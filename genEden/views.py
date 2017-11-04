@@ -4,6 +4,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from genEden.models import *
 from genEden.serializers import *
+import paho.mqtt.client as mqtt
 #import coreapi
 #guia: http://levipy.com/crear-api-rest-con-django-rest-framework/
 
@@ -99,7 +100,42 @@ def get_variables(request,pkUsuario,pkMaceta):
 
 #def set_variables():
 
-#def regar_maceta():
+def on_message(client, userdata, message):
+	print("Message received ",str(message.payload.decode("utf-8")))
+	print("Message topic = ",message.topic)
+
+
+@csrf_exempt
+def regar_maceta(request,pkUsuario,pkMaceta):
+	# Regar la maceta....'echarle aguita a la matica'
+	if request.method == 'GET':
+		try:
+			usuario = User.objects.get(id=pkUsuario)
+			maceta = Maceta.objects.get(id=pkMaceta)
+
+			topic = "maceta/actions/regar"
+			broker_address="192.168.0.60"
+			client = mqtt.Client("P2")
+			client.connect(broker_address)
+			client.loop_start()
+			print("Publishing message to topic:",topic)
+			client.publish(topic,'1') #Encender la bomba
+			#time.sleep(4) # No se porque es necesario esto
+			client.loop_stop()
+
+		except User.DoesNotExist:
+			return JSONResponse({"regar":0},status=404)
+
+
+		except User.DoesNotExist:
+			return JSONResponse({"regar":0},status=404)
+
+		return JSONResponse({"regar":1},status=200)
+
+	else:
+		return JSONResponse({"regar":0},status=404)
+#	send_vars(18,30,70,60)
+#	return JSONResponse({"regar":1},status=200)
 
 #def conectar_maceta():
 

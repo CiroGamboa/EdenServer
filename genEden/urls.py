@@ -9,6 +9,6 @@ urlpatterns = [
 	#url(r'^registrarMaceta/$',views.registrar_maceta),
 	url(r'^registrarMaceta/(?P<idUsuario>.*)/$',views.registrar_maceta),
 	url(r'^getVariables/(?P<pkUsuario>[0-9]+)/(?P<pkMaceta>[0-9]+)/$',views.get_variables),
-	#url(r'^regarMaceta/(?P<pkUsuario>[0-9]+)/(?P<pkMaceta>[0-9]+)/$',views.regar_maceta),
+	url(r'^regarMaceta/(?P<pkUsuario>[0-9]+)/(?P<pkMaceta>[0-9]+)/$',views.regar_maceta),
 	url(r'^agregarSemilla/(?P<pkUsuario>[0-9]+)/(?P<pkMaceta>[0-9]+)/(?P<pkPlanta>[0-9]+)/$',views.agregar_semilla),
 ]
