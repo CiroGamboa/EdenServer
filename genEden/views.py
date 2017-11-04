@@ -125,6 +125,11 @@ def get_variables(request,pkUsuario,pkMaceta):
 
 @csrf_exempt
 def get_stats_h(request,pkUsuario,pkMaceta):
+
+	#Orden:
+	# Temperatura : min, max, prom
+	# Humedad: min, max, prom
+	# Luminosidad: min, max, prom
 	if request.method == 'GET':
 		try:
 			tasaEnvio = 3 # Tasa de envio de variables por parte de la maceta (en segundos)
@@ -132,7 +137,7 @@ def get_stats_h(request,pkUsuario,pkMaceta):
 
 			usuario = User.objects.get(id=pkUsuario)
 			maceta = Maceta.objects.get(id=pkMaceta)
-			
+
 			promtem = round(LogsTemperatura.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Avg('valor'))['valor__avg'],1)
 			promlum = round(LogsLuminosidad.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Avg('valor'))['valor__avg'],1)
 			promhum = round(LogsHumedad.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Avg('valor'))['valor__avg'],1)
@@ -147,6 +152,13 @@ def get_stats_h(request,pkUsuario,pkMaceta):
 
 		except User.DoesNotExist:
 			return HttpResponse(status=404)
+
+		serializer = data={
+			'tem_min':mintem,'tem_max':maxtem,'tem_prom':promtem,
+			'hum_min':minhum,'hum_max':maxhum,'hum_prom':promhum,
+			'lum_min':minlum,'lum_max':maxlum,'lum_prom':promlum}
+
+		return JSONResponse(serializer)
 
 #### MQTT
 def on_message(client, userdata, message):

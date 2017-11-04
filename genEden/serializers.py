@@ -45,3 +45,5 @@ class VariablesSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Maceta
 		fields = ('temperatura','humedad','luminosidad','nivel')
+
+
