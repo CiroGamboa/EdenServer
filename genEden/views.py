@@ -26,7 +26,6 @@ class JSONResponse(HttpResponse):
 
 @csrf_exempt
 def registrar_usuario(request,passw,nombre,email):
-
 	if request.method == 'GET':
 		try:
 			User.objects.create(passw=passw,nombre=nombre,email=email)
@@ -35,6 +34,31 @@ def registrar_usuario(request,passw,nombre,email):
 			return HttpResponse(status=404)
 
 		return JSONResponse(idUsuario)
+
+@csrf_exempt
+def login_usuario(request,email,passw):
+	if request.method == 'GET':
+		try:
+			usuario = User.objects.get(email=email,passw=passw)
+			idUsuario = usuario.id
+		except User.DoesNotExist:
+			return JSONResponse('0')
+
+		return JSONResponse(idUsuario)
+
+# Esto es poco eficiente pero es una solucion rapida
+@csrf_exempt
+def get_maceta(request,idUsuario):
+	if request.method == 'GET':
+		try:
+			usuario = User.objects.get(id=idUsuario)
+			maceta = Maceta.objects.get(usuario=usuario)
+			idMaceta = maceta.id
+		except User.DoesNotExist:
+			return JSONResponse('0')
+
+		return JSONResponse(idMaceta)
+
 
 @csrf_exempt
 def registrar_maceta(request,idUsuario):
@@ -113,8 +137,8 @@ def regar_maceta(request,pkUsuario,pkMaceta):
 			usuario = User.objects.get(id=pkUsuario)
 			maceta = Maceta.objects.get(id=pkMaceta)
 
-			topic = "maceta/actions/regar"
-			broker_address="192.168.0.60"
+			topic = "maceta/actions/regar/"+maceta.serial
+			broker_address="192.168.1.17"
 			client = mqtt.Client("P2")
 			client.connect(broker_address)
 			client.loop_start()
@@ -173,17 +197,17 @@ def init_db():
  #    ciudad = models.CharField(max_length=32,null=True)
  #    fechaNacimiento = models.DateField(null=True)
 
-	usuario = User.objects.create(passw="123",nombre="Ciro",email="ciro@eden.com",pais="Colombia",ciudad="Bucaramanga")
-	User.objects.create(passw="123",nombre="Alix",email="alix@eden.com",pais="Colombia",ciudad="Bucaramanga")
-	User.objects.create(passw="123",nombre="Alvaro",email="alvaro@eden.com",pais="Colombia",ciudad="Bucaramanga")
-	User.objects.create(passw="123",nombre="Brian",email="brian@eden.com",pais="Colombia",ciudad="Bucaramanga")
-	User.objects.create(passw="123",nombre="Hernan",email="hernan@eden.com",pais="Colombia",ciudad="Bucaramanga")
+	ciro = User.objects.create(passw="123",nombre="Ciro",email="ciro@eden.com",pais="Colombia",ciudad="Bucaramanga")
+	alix = User.objects.create(passw="123",nombre="Alix",email="alix@eden.com",pais="Colombia",ciudad="Bucaramanga")
+	alvaro = User.objects.create(passw="123",nombre="Alvaro",email="alvaro@eden.com",pais="Colombia",ciudad="Bucaramanga")
+	brian = User.objects.create(passw="123",nombre="Brian",email="brian@eden.com",pais="Colombia",ciudad="Bucaramanga")
+	hernan = User.objects.create(passw="123",nombre="Hernan",email="hernan@eden.com",pais="Colombia",ciudad="Bucaramanga")
 
  ##	Creacion de tipos de planta
  #	nombre = models.CharField(max_length=32)
 
-	planta = Planta.objects.create(nombre="Tomate")
-	Planta.objects.create(nombre="Fresa")
+	tomate = Planta.objects.create(nombre="Tomate")
+	fresa = Planta.objects.create(nombre="Fresa")
 
  ## Creacion de macetas
   #   tipoPlanta = models.ForeignKey('Planta', on_delete= models.CASCADE,related_name='macetas_planta',default=1) #Tomate por defecto
@@ -192,14 +216,38 @@ def init_db():
   #   usuario = models.ForeignKey('User', on_delete=models.CASCADE,related_name='macetas')
 	#planta = Planta.objects.get(nombre="Tomate")
 	#usuario = User.objects.get(nombre="Ciro")
-	maceta = Maceta.objects.create(tipoPlanta=planta,usuario=usuario)
+	macetaCiro = Maceta.objects.create(tipoPlanta=tomate,usuario=ciro,serial="eden1")
+	macetaAlix = Maceta.objects.create(tipoPlanta=tomate,usuario=alix,serial="eden2")
+	macetaAlvaro = Maceta.objects.create(tipoPlanta=tomate,usuario=alvaro,serial="eden3")
+	macetaBrian = Maceta.objects.create(tipoPlanta=tomate,usuario=brian,serial="eden4")
+	macetaHernan = Maceta.objects.create(tipoPlanta=tomate,usuario=hernan,serial="eden5")
 
  ## Creacion de logs
 
-	LogsTemperatura.objects.create(maceta=maceta,valor=25)
-	LogsLuminosidad.objects.create(maceta=maceta,valor=57)
-	LogsHumedad.objects.create(maceta=maceta,valor=35)
-	LogsNivel.objects.create(maceta=maceta,valor=100)
+	LogsTemperatura.objects.create(maceta=macetaCiro,valor=25)
+	LogsLuminosidad.objects.create(maceta=macetaCiro,valor=57)
+	LogsHumedad.objects.create(maceta=macetaCiro,valor=35)
+	LogsNivel.objects.create(maceta=macetaCiro,valor=100)
+
+	LogsTemperatura.objects.create(maceta=macetaAlix,valor=25)
+	LogsLuminosidad.objects.create(maceta=macetaAlix,valor=57)
+	LogsHumedad.objects.create(maceta=macetaAlix,valor=35)
+	LogsNivel.objects.create(maceta=macetaAlix,valor=100)
+
+	LogsTemperatura.objects.create(maceta=macetaAlvaro,valor=25)
+	LogsLuminosidad.objects.create(maceta=macetaAlvaro,valor=57)
+	LogsHumedad.objects.create(maceta=macetaAlvaro,valor=35)
+	LogsNivel.objects.create(maceta=macetaAlvaro,valor=100)
+
+	LogsTemperatura.objects.create(maceta=macetaBrian,valor=25)
+	LogsLuminosidad.objects.create(maceta=macetaBrian,valor=57)
+	LogsHumedad.objects.create(maceta=macetaBrian,valor=35)
+	LogsNivel.objects.create(maceta=macetaBrian,valor=100)
+
+	LogsTemperatura.objects.create(maceta=macetaHernan,valor=25)
+	LogsLuminosidad.objects.create(maceta=macetaHernan,valor=57)
+	LogsHumedad.objects.create(maceta=macetaHernan,valor=35)
+	LogsNivel.objects.create(maceta=macetaHernan,valor=100)
 
 
 

@@ -4,7 +4,9 @@ class Maceta(models.Model):
     tipoPlanta = models.ForeignKey('Planta', on_delete= models.CASCADE,related_name='macetas_planta',default=1, null=True) #Tomate por defecto
     fechaPlantacion= models.DateTimeField(null=True)
     primeraCosecha = models.DateTimeField(null=True)
-    usuario = models.ForeignKey('User', on_delete=models.CASCADE,related_name='macetas')
+    usuario = models.ForeignKey('User', on_delete=models.CASCADE,related_name='macetas',null=True)
+    serial = models.CharField(max_length=32,null=True,unique=True)
+    experiencia = models.IntegerField(default=0)
 
 class Planta(models.Model):
     nombre = models.CharField(max_length=32)
