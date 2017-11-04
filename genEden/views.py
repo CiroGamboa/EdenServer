@@ -16,6 +16,157 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
+
+
+
+################################################################
+################################################################
+# METODOS FINALES
+
+@csrf_exempt
+def registrar_usuario(request,passw,nombre,email):
+
+	if request.method == 'GET':
+		try:
+			User.objects.create(passw=passw,nombre=nombre,email=email)
+			idUsuario = User.objects.order_by('-id')[0].id
+		except User.DoesNotExist:
+			return HttpResponse(status=404)
+
+		return JSONResponse(idUsuario)
+
+@csrf_exempt
+def registrar_maceta(request,idUsuario):
+	"""
+	Registrar un nueva maceta
+	"""
+	if request.method == 'GET':
+
+		try:
+			usuario = User.objects.get(id=idUsuario)
+			#planta = Planta.objects.get(id=2)
+			#Maceta.objects.create(tipoPlanta=planta,usuario=usuario)
+			Maceta.objects.create(usuario=usuario)
+			maceta = Maceta.objects.order_by('-id')[0]
+			#El id=2 para tipo planta indica que no se ha escogido una semilla
+		except User.DoesNotExist:
+			return JSONResponse(status=400)
+
+		#conec = conectar_maceta()
+
+		# Crear primer registro en la DB asociado a esa maceta
+		LogsTemperatura.objects.create(maceta=maceta,valor=25)
+		LogsLuminosidad.objects.create(maceta=maceta,valor=57)
+		LogsHumedad.objects.create(maceta=maceta,valor=35)
+		LogsNivel.objects.create(maceta=maceta,valor=100)
+
+		return JSONResponse(maceta.id)
+
+	else:
+		return JSONResponse(status=400)
+
+@csrf_exempt
+def get_variables(request,pkUsuario,pkMaceta):
+	"""
+	Obtener el ultimo registro de las variables, request hecho por al app
+	"""
+	if request.method == 'GET':
+		try:
+			usuario = User.objects.get(id=pkUsuario)
+			maceta = Maceta.objects.get(id=pkMaceta)	
+
+		except User.DoesNotExist:
+			return HttpResponse(status=404)
+
+		try:
+			temperatura=LogsTemperatura.objects.filter(maceta=maceta).order_by('-id')[0]
+			luminosidad=LogsLuminosidad.objects.filter(maceta=maceta).order_by('-id')[0]
+			humedad=LogsHumedad.objects.filter(maceta=maceta).order_by('-id')[0]
+			nivel=LogsNivel.objects.filter(maceta=maceta).order_by('-id')[0]
+
+		except User.DoesNotExist:
+			return HttpResponse(status=404)
+
+		serializer = data={
+			'temperatura':temperatura.valor,'luminosidad':luminosidad.valor,
+			'humedad':humedad.valor,'nivel':nivel.valor}
+
+		return JSONResponse(serializer)
+
+	else:
+		return JSONResponse(status=400)
+
+
+#def set_variables():
+
+#def regar_maceta():
+
+#def conectar_maceta():
+
+
+
+@csrf_exempt
+def agregar_semilla(request,pkUsuario,pkMaceta,pkPlanta):
+	"""
+	Indicar la semilla que sera plantada
+	"""
+	if request.method == 'GET':
+		try: 
+			usuario = User.objects.get(id=pkUsuario)
+			maceta = Maceta.objects.get(id=pkMaceta)
+			planta = Planta.objects.get(id=pkPlanta)
+
+
+		except User.DoesNotExist:
+		 	return HttpResponse(status=404)
+
+		maceta.tipoPlanta = planta
+		maceta.save()
+
+		return HttpResponse(status=200)
+
+	else:
+		return HttpResponse(status=400)
+################################################################
+def init_db():
+ ##	  Creacion de usuarios
+ # 	  passw = models.CharField(max_length=32)
+ #    nombre = models.CharField(max_length=32)
+ #    email =  models.CharField(max_length=32)
+ #    pais =  models.CharField(max_length=32,null=True)
+ #    ciudad = models.CharField(max_length=32,null=True)
+ #    fechaNacimiento = models.DateField(null=True)
+
+	usuario = User.objects.create(passw="123",nombre="Ciro",email="ciro@eden.com",pais="Colombia",ciudad="Bucaramanga")
+	User.objects.create(passw="123",nombre="Alix",email="alix@eden.com",pais="Colombia",ciudad="Bucaramanga")
+	User.objects.create(passw="123",nombre="Alvaro",email="alvaro@eden.com",pais="Colombia",ciudad="Bucaramanga")
+	User.objects.create(passw="123",nombre="Brian",email="brian@eden.com",pais="Colombia",ciudad="Bucaramanga")
+	User.objects.create(passw="123",nombre="Hernan",email="hernan@eden.com",pais="Colombia",ciudad="Bucaramanga")
+
+ ##	Creacion de tipos de planta
+ #	nombre = models.CharField(max_length=32)
+
+	planta = Planta.objects.create(nombre="Tomate")
+	Planta.objects.create(nombre="Fresa")
+
+ ## Creacion de macetas
+  #   tipoPlanta = models.ForeignKey('Planta', on_delete= models.CASCADE,related_name='macetas_planta',default=1) #Tomate por defecto
+  #   fechaPlantacion= models.DateTimeField(null=True)
+  #   primeraCosecha = models.DateTimeField(null=True)
+  #   usuario = models.ForeignKey('User', on_delete=models.CASCADE,related_name='macetas')
+	#planta = Planta.objects.get(nombre="Tomate")
+	#usuario = User.objects.get(nombre="Ciro")
+	maceta = Maceta.objects.create(tipoPlanta=planta,usuario=usuario)
+
+ ## Creacion de logs
+
+	LogsTemperatura.objects.create(maceta=maceta,valor=25)
+	LogsLuminosidad.objects.create(maceta=maceta,valor=57)
+	LogsHumedad.objects.create(maceta=maceta,valor=35)
+	LogsNivel.objects.create(maceta=maceta,valor=100)
+
+
+
 ################################################################
 # @csrf_exempt
 # def registrar_usuario(request):
@@ -38,17 +189,7 @@ class JSONResponse(HttpResponse):
 # ################################################################
 
 ################################################################
-@csrf_exempt
-def registrar_usuario(request,passw,nombre,email):
 
-	if request.method == 'GET':
-		try:
-			User.objects.create(passw=passw,nombre=nombre,email=email)
-			idUsuario = User.objects.order_by('-id')[0].id
-		except User.DoesNotExist:
-			return HttpResponse(status=404)
-
-		return JSONResponse(idUsuario)
 
 
 # ################################################################
@@ -79,68 +220,12 @@ def registrar_usuario(request,passw,nombre,email):
 # ################################################################
 
 ################################################################
-@csrf_exempt
-def registrar_maceta(request,idUsuario):
-	"""
-	Registrar un nueva maceta
-	"""
-	if request.method == 'GET':
 
-		try:
-			usuario = User.objects.get(id=idUsuario)
-			planta = Planta.objects.get(id=2)
-			Maceta.objects.create(tipoPlanta=planta,usuario=usuario)
-			maceta = Maceta.objects.order_by('-id')[0]
-			#El id=2 para tipo planta indica que no se ha escogido una semilla
-		except User.DoesNotExist:
-			return JSONResponse(status=400)
-
-		#conec = conectar_maceta()
-
-		# Crear primer registro en la DB asociado a esa maceta
-		LogsTemperatura.objects.create(maceta=maceta,valor=25)
-		LogsLuminosidad.objects.create(maceta=maceta,valor=57)
-		LogsHumedad.objects.create(maceta=maceta,valor=35)
-		LogsNivel.objects.create(maceta=maceta,valor=100)
-
-		return JSONResponse(maceta.id)
-
-	else:
-		return JSONResponse(status=400)
 ################################################################
 
 ################################################################
 
-@csrf_exempt
-def get_variables(request,pkUsuario,pkMaceta):
-	"""
-	Obtener el ultimo registro de las variables
-	"""
-	if request.method == 'GET':
-		try:
-			usuario = User.objects.get(id=pkUsuario)
-			maceta = Maceta.objects.get(id=pkMaceta)	
 
-		except User.DoesNotExist:
-			return HttpResponse(status=404)
-
-		try:
-			temperatura=LogsTemperatura.objects.filter(maceta=maceta).order_by('-id')[0]
-			luminosidad=LogsLuminosidad.objects.filter(maceta=maceta).order_by('-id')[0]
-			humedad=LogsHumedad.objects.filter(maceta=maceta).order_by('-id')[0]
-			nivel=LogsNivel.objects.filter(maceta=maceta).order_by('-id')[0]
-
-		except User.DoesNotExist:
-			return HttpResponse(status=404)
-
-		serializer = data={
-			'temperatura':temperatura.valor,'luminosidad':luminosidad.valor,
-			'humedad':humedad.valor,'nivel':nivel.valor}
-
-		return JSONResponse(serializer)
-
-	else:
-		return JSONResponse(status=400)
 ################################################################
 def send_vars(tem,lum,hum,niv):
 	maceta = Maceta.objects.order_by('-id')[0]
@@ -184,7 +269,7 @@ def reg_vars(case):
 
 	
 ################################################################
-def registrar_variables(ipMaceta):
+#def registrar_variables(ipMaceta):
 	"""
 	Obtener las variables de temperatura, luminosidad, enviadas desde la maceta
 	# """
@@ -212,13 +297,13 @@ def registrar_variables(ipMaceta):
 	# luminosidad.save()
 	# humedad.save()
 	# nivel.save()
-	return 0
+#	return 0
 
 ################################################################
 
 ################################################################
-@csrf_exempt
-def regar_maceta(request,pkUsuario,pkMaceta):
+#@csrf_exempt
+#def regar_maceta(request,pkUsuario,pkMaceta):
 	"""
 	Regar la maceta
 	"""
@@ -243,13 +328,13 @@ def regar_maceta(request,pkUsuario,pkMaceta):
 
 	# else:
 	# 	return JSONResponse({"regar":0},status=404)
-	send_vars(18,30,70,60)
-	return JSONResponse({"regar":1},status=200)
+#	send_vars(18,30,70,60)
+#	return JSONResponse({"regar":1},status=200)
 ################################################################
 
 ################################################################
-@csrf_exempt
-def conectar_maceta():
+#@csrf_exempt
+#def conectar_maceta():
 
 		# try:
 		# 	ip = '192.168.1.17'
@@ -257,32 +342,15 @@ def conectar_maceta():
 		# 	response = client.get('http://'+ip+'/digital/3/1')
 		# except User.DoesNotExist:
 		#  	return 0
-		return 1
+#		return 1
 ################################################################
 
 ################################################################
 
-@csrf_exempt
-def agregar_semilla(request,pkUsuario,pkMaceta,pkPlanta):
-	"""
-	Obtener el ultimo registro de las variables
-	"""
-	if request.method == 'GET':
-		try: 
-			usuario = User.objects.get(id=pkUsuario)
-			maceta = Maceta.objects.get(id=pkMaceta)
-			planta = Planta.objects.get(id=pkPlanta)
 
-
-		except User.DoesNotExist:
-		 	return HttpResponse(status=404)
-
-		maceta.tipoPlanta = planta
-		maceta.save()
-
-		return HttpResponse(status=200)
-
-	else:
-		return HttpResponse(status=400)
 ################################################################
+
+
+
+
 

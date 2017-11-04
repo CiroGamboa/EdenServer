@@ -1,8 +1,7 @@
 from django.db import models
 
 class Maceta(models.Model):
-
-    tipoPlanta = models.ForeignKey('Planta', on_delete= models.CASCADE,related_name='macetas_planta',default=2)
+    tipoPlanta = models.ForeignKey('Planta', on_delete= models.CASCADE,related_name='macetas_planta',default=1, null=True) #Tomate por defecto
     fechaPlantacion= models.DateTimeField(null=True)
     primeraCosecha = models.DateTimeField(null=True)
     usuario = models.ForeignKey('User', on_delete=models.CASCADE,related_name='macetas')
