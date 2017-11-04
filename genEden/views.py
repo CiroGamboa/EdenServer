@@ -5,6 +5,7 @@ from rest_framework.parsers import JSONParser
 from genEden.models import *
 from genEden.serializers import *
 import paho.mqtt.client as mqtt
+from django.db.models import Avg,Max,Min
 #import coreapi
 #guia: http://levipy.com/crear-api-rest-con-django-rest-framework/
 
@@ -122,8 +123,32 @@ def get_variables(request,pkUsuario,pkMaceta):
 		return JSONResponse(status=400)
 
 
-#def set_variables():
+@csrf_exempt
+def get_stats_h(request,pkUsuario,pkMaceta):
+	if request.method == 'GET':
+		try:
+			tasaEnvio = 3 # Tasa de envio de variables por parte de la maceta (en segundos)
+			muestras = 3600/tasaEnvio # Segundos en una hora
 
+			usuario = User.objects.get(id=pkUsuario)
+			maceta = Maceta.objects.get(id=pkMaceta)
+			
+			promtem = round(LogsTemperatura.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Avg('valor'))['valor__avg'],1)
+			promlum = round(LogsLuminosidad.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Avg('valor'))['valor__avg'],1)
+			promhum = round(LogsHumedad.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Avg('valor'))['valor__avg'],1)
+
+			maxtem = round(LogsTemperatura.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Max('valor'))['valor__max'],1)
+			maxlum = round(LogsLuminosidad.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Max('valor'))['valor__max'],1)
+			maxhum = round(LogsHumedad.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Max('valor'))['valor__max'],1)
+
+			mintem = round(LogsTemperatura.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Min('valor'))['valor__min'],1)
+			minlum = round(LogsLuminosidad.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Min('valor'))['valor__min'],1)
+			minhum = round(LogsHumedad.objects.filter(maceta=maceta).order_by('-id')[:muestras].aggregate(Min('valor'))['valor__min'],1)
+
+		except User.DoesNotExist:
+			return HttpResponse(status=404)
+
+#### MQTT
 def on_message(client, userdata, message):
 	print("Message received ",str(message.payload.decode("utf-8")))
 	print("Message topic = ",message.topic)
