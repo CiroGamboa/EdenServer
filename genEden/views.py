@@ -202,7 +202,7 @@ def regar_maceta(request,pkUsuario,pkMaceta):
 			if nivelAnterior-factorDisminucion <= 10: #Cuando solo quede un riego en el tanque
 				LogsNivel.objects.create(maceta=maceta,valor=100)
 			else:
-				LogsNivel.objects.create(maceta=maceta,valor=nivelAnterior)
+				LogsNivel.objects.create(maceta=maceta,valor=nivelAnterior-factorDisminucion)
 
 
 		except User.DoesNotExist:
