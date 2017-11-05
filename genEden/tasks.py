@@ -19,7 +19,7 @@ lumTopic = "maceta/vars/luminosidad/"
 nivTopic = "maceta/vars/nivel/"
 
 ### Broker
-broker_address="192.168.1.17"
+broker_address="192.168.1.16"
 
 # Maceta real
 maceta = Maceta.objects.get(serial="eden1")

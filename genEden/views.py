@@ -60,6 +60,18 @@ def get_maceta(request,idUsuario):
 
 		return JSONResponse(idMaceta)
 
+# Esto es poco eficiente pero es una solucion rapida
+@csrf_exempt
+def get_name(request,idUsuario):
+	if request.method == 'GET':
+		try:
+			usuario = User.objects.get(id=idUsuario)
+			nombre = usuario.nombre
+		except User.DoesNotExist:
+			return JSONResponse('0')
+
+		return JSONResponse(nombre)
+
 
 @csrf_exempt
 def registrar_maceta(request,idUsuario):
@@ -175,7 +187,7 @@ def regar_maceta(request,pkUsuario,pkMaceta):
 			maceta = Maceta.objects.get(id=pkMaceta)
 
 			topic = "maceta/actions/regar/"+maceta.serial
-			broker_address="192.168.1.17"
+			broker_address="192.168.1.16"
 			client = mqtt.Client("P2")
 			client.connect(broker_address)
 			client.loop_start()
