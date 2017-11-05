@@ -25,7 +25,7 @@ SECRET_KEY = '@-!y5ko0aemazi4g=o43kqwu!&%vkc8p%uji$a0+xauz+p+ham'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.16']
+ALLOWED_HOSTS = ['192.168.1.16','ec2-54-68-33-120.us-west-2.compute.amazonaws.com']
 
 
 # Application definition
@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'edendb',
         'USER':'root',
-        'PASSWORD':'Gamboa96_MySQL',
+        'PASSWORD':'Redes852..', # En local: Gamboa96_MySQL
         'HOST':'',
         'PORT':'',
     }

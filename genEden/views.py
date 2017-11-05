@@ -187,7 +187,7 @@ def regar_maceta(request,pkUsuario,pkMaceta):
 			maceta = Maceta.objects.get(id=pkMaceta)
 
 			topic = "maceta/actions/regar/"+maceta.serial
-			broker_address="192.168.1.16"
+			broker_address="ec2-54-68-33-120.us-west-2.compute.amazonaws.com" #Local: "192.168.1.16"
 			client = mqtt.Client("P2")
 			client.connect(broker_address)
 			client.loop_start()
