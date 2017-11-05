@@ -196,6 +196,15 @@ def regar_maceta(request,pkUsuario,pkMaceta):
 			#time.sleep(4) # No se porque es necesario esto
 			client.loop_stop()
 
+			# Disminuir el valor del nivel
+			factorDisminucion = 10 #10% del nivel
+			nivelAnterior=LogsNivel.objects.filter(maceta=maceta).order_by('-id')[0].valor
+			if nivelAnterior-factorDisminucion <= 10: #Cuando solo quede un riego en el tanque
+				LogsNivel.objects.create(maceta=maceta,valor=100)
+			else:
+				LogsNivel.objects.create(maceta=maceta,valor=nivelAnterior)
+
+
 		except User.DoesNotExist:
 			return JSONResponse({"regar":0},status=404)
 

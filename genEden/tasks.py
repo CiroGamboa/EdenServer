@@ -44,9 +44,9 @@ def on_message(client, userdata, message):
 		print("Luminosidad: ",str(var))
 		LogsHumedad.objects.create(maceta=maceta,valor=var)
 
-	elif message.topic == nivTopic+"eden1":
-		print("Nivel: ",str(var))
-		LogsNivel.objects.create(maceta=maceta,valor=var)
+	#elif message.topic == nivTopic+"eden1":
+	#	print("Nivel: ",str(var))
+	#	LogsNivel.objects.create(maceta=maceta,valor=var)
 
 
 @celeryd_init.connect
@@ -60,7 +60,7 @@ def set_variables(sender=None, conf=None, **kwargs):
 		client.subscribe(temTopic+maceta.serial)
 		client.subscribe(humTopic+maceta.serial)
 		client.subscribe(lumTopic+maceta.serial)
-		client.subscribe(nivTopic+maceta.serial)
+		#client.subscribe(nivTopic+maceta.serial) # Ya que no se va a usar sensor de nivel, no es necesario suscribirse a el topic
 	client.loop_forever()
         
 # @celeryd_init.connect
