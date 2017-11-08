@@ -33,16 +33,32 @@ def on_message(client, userdata, message):
     #print("message retain flag=",message.retain)
 	var = message.payload.decode("utf-8")
 	if message.topic == temTopic+"eden1": # Esto es solo para la primera maceta, que tiene el serial 'eden1'
-		print("Temperatura: ",str(var))
-		LogsTemperatura.objects.create(maceta=maceta,valor=var)
+		temperatura = round(0.225*var - 157.03)
+		if temperatura > 50:
+			temperatura = 50
+		elif temperatura < 0:
+			temperatura = 0
+		print("Temperatura : ",str(temperatura))
+		LogsTemperatura.objects.create(maceta=maceta,valor=temperatura)
 
 	elif message.topic == humTopic+"eden1":
-		print("Humedad: ",str(var))
-		LogsLuminosidad.objects.create(maceta=maceta,valor=var)
+		humedad = round(-0.2353*var + 171.76)
+		if humedad > 100:
+			humedad = 100
+		elif humedad < 0:
+			humedad = 0
+		print("Humedad: ",str(humedad))
+		LogsLuminosidad.objects.create(maceta=maceta,valor=humedad)
 
 	elif message.topic == lumTopic+"eden1":
-		print("Luminosidad: ",str(var))
-		LogsHumedad.objects.create(maceta=maceta,valor=var)
+		luminosidad = 0.8621*var - 3.4483
+		if luminosidad > 100:
+			luminosidad = 100
+		elif luminosidad < 0:
+			luminosidad = 0
+
+		print("Luminosidad: ",str(luminosidad))
+		LogsHumedad.objects.create(maceta=maceta,valor=luminosidad)
 
 	#elif message.topic == nivTopic+"eden1":
 	#	print("Nivel: ",str(var))
