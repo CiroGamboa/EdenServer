@@ -19,5 +19,12 @@ client1.on_publish = on_publish
 client1.connect(broker,port)
 
 #publish
-ret= client1.publish("pot/irrigate","on")
-print(ret)
+# Regar maceta
+client1.publish("pot/irrigate","on")
+
+# Simular publicacion de variables por maceta
+client1.publish("pot/temperature",random.randint(10,40))
+client1.publish("pot/luminosity",random.randint(10,50))
+client1.publish("pot/humedity",random.randint(10,60))
+client1.publish("pot/water_level",random.randint(1,100))
+
